@@ -43,6 +43,8 @@ int main() {
 
     for(;;){
       int ack = accept(server_fd, (struct sockaddr *) &address, &var);
+      printf("Client addr : %s\n", inet_ntoa(address.sin_addr)  );
+      printf("Client port : %d\n", address.sin_port );
       printf("Accepted %d\n", ack );
       char *caracter ;
       char received[1024];
