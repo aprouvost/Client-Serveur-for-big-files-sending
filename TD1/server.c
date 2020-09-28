@@ -45,13 +45,13 @@ int main() {
       int ack = accept(server_fd, (struct sockaddr *) &address, &var);
       printf("Accepted %d\n", ack );
       char *caracter ;
-      char *received;
+      char received[1024];
       caracter = "Hello from server ";
       //int res = write(ack, caracter, strlen(caracter));
       //printf("Message sent to client \n");
       int res = read(ack, received, 1024);
-      printf("Value %d", res);
-      //printf("Received value from client : %s\n",received );
+      printf("Value %d \n", res);
+      printf("Received value from client : %s\n",received );
     }
 
     //ou

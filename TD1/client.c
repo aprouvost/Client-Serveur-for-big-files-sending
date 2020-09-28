@@ -42,11 +42,11 @@ int main() {
     char *caracter;
     char *received;
     caracter=" Hello from client ";
-    int res = write(conn, caracter, strlen(caracter));
-    //printf("Message sent to server %d\n", res);
+    write(sock, caracter, strlen(caracter));
+    printf("Message sent to server : %s\n", caracter);
     //int res = read(sock, received, 1024);
-    printf("Value %d", res);
-    printf("Received value from server : %s\n",received );
+    // printf("Value %d", res);
+    // printf("Received value from server : %s\n",received );
 
 
     // printf("%d\n", adr.s_addr);
