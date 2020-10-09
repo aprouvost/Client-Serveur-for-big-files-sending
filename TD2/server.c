@@ -5,13 +5,25 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <arpa/inet.h>
+
 
 #define RCVSIZE 1024
+#define MAXLINE 1024
 
 int main (int argc, char *argv[]) {
 
-  struct sockaddr_in adresse, client;
-  int port= 5001;
+  if (argc < 2){
+    printf("One arg needed, <port> \n");
+    return -1;
+  }
+
+  struct sockaddr_in adresse, client, UDPaddr, cliaddr;
+  // int port= 5001;
+  int port= atoi(argv[1]);
+
   int valid= 1;
   socklen_t alen= sizeof(client);
   char buffer[RCVSIZE];
@@ -19,8 +31,10 @@ int main (int argc, char *argv[]) {
   //create socket
   int server_desc = socket(AF_INET, SOCK_STREAM, 0);
 
+  int server_desc_udp = socket(AF_INET, SOCK_DGRAM, 0);
+
   //handle error
-  if (server_desc < 0) {
+  if (server_desc < 0 || server_desc_udp < 0) {
     perror("Cannot create socket\n");
     return -1;
   }
@@ -39,34 +53,95 @@ int main (int argc, char *argv[]) {
   }
 
 
+  memset(&UDPaddr, 0, sizeof(UDPaddr));
+  memset(&cliaddr, 0, sizeof(cliaddr));
+
+  // Socket udp
+  UDPaddr.sin_family= AF_INET;
+  UDPaddr.sin_addr.s_addr= INADDR_ANY;
+  UDPaddr.sin_port = htons(4567);
+
+
+  if (bind(server_desc_udp, (struct sockaddr*) &UDPaddr, sizeof(UDPaddr)) == -1){
+    perror("Bind failed \n");
+    close(server_desc_udp);
+    return -1;
+  }
+
+
   //listen to incoming clients
   if (listen(server_desc, 0) < 0) {
-    printf("Listen failed\n");
+    printf("Listen failed tcp\n");
     return -1;
   }
 
   printf("Listen done\n");
 
+  fd_set sock_set;
+  //int timeout = 5;
+  //truct timeval select_timeout;
+  //select_timeout.tv_sec = timeout;
+  //select_timeout.tv_usec = 0;
+
+  FD_ZERO(&sock_set);
+
   while (1) {
 
-    printf("Accepting\n");
-    int client_desc = accept(server_desc, (struct sockaddr*)&client, &alen);
 
-    printf("Value of accept is:%d\n", client_desc);
-    
-    int msgSize = read(client_desc,buffer,RCVSIZE);
+    FD_SET(server_desc_udp, &sock_set);
+    FD_SET(server_desc, &sock_set);
 
-    while (msgSize > 0) {
-      write(client_desc,buffer,msgSize);
-      printf("%s",buffer);
-      memset(buffer,0,RCVSIZE);
-      msgSize = read(client_desc,buffer,RCVSIZE);
+
+    int max_input = 4;
+    select(max_input, &sock_set, NULL, NULL, NULL);
+    if (FD_ISSET(server_desc_udp, &sock_set)){ // si c'est de l'UDP
+      printf("C'est de l'UDP qui passe \n" );
+
+      //lecture du message
+      int len, n;
+
+      len = sizeof(cliaddr);  //len is value/resuslt
+
+      n = recvfrom(server_desc_udp, (char *)buffer, MAXLINE,
+                  MSG_WAITALL, ( struct sockaddr *) &cliaddr,
+                  &len);
+      buffer[n] = '\0';
+      printf("Client : %s\n", buffer);
+
     }
 
-    close(client_desc);
 
+    if (FD_ISSET(server_desc, &sock_set)){ // si c'est de l'UDP
+      printf("C'est du TCP qui passe \n" );
+
+      int client_desc = accept(server_desc, (struct sockaddr*)&client, &alen);
+      printf("Value of accept is:%d\n", client_desc);
+
+      int pid = fork();
+
+      if (pid<0){
+        printf(" Error for fork function ");
+        exit(EXIT_FAILURE);
+      } else if (pid == 0){
+        printf("Socket value after accepted: %d \n", client_desc);
+        close(server_desc);
+        int msgSize = read(client_desc,buffer,RCVSIZE);
+        while (msgSize > 0) {
+          write(client_desc,buffer,msgSize);
+          printf("%s",buffer);
+          memset(buffer,0,RCVSIZE);
+          msgSize = read(client_desc,buffer,RCVSIZE);
+        }
+        printf("Ending process");
+        exit(EXIT_SUCCESS);
+      }else if (pid > 0){
+        close(client_desc);
+      }
+    }
+    //printf("Accepting\n");
+    //printf("Socket value on Server side: %d \n", server_desc);
   }
 
-close(server_desc);
+//close(server_desc);
 return 0;
 }

@@ -5,18 +5,29 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 #define RCVSIZE 1024
 
 int main (int argc, char *argv[]) {
 
-  if (argc < 2){
+  if (argc < 3){
     printf("2 args needed, <@ip> <port>\n");
-    return -1
+    return -1;
   }
 
+
+
   struct sockaddr_in adresse;
-  int port = 5001;
+  // int port = 5001;
+  int port = atoi(argv[2]);
+
+  int res = inet_aton(argv[1], &adresse.sin_addr);
+  if (res < 0){
+    printf("Incompatible ip address");
+    exit(EXIT_FAILURE);
+  }
   int valid = 1;
   char msg[RCVSIZE];
   char blanmsg[RCVSIZE];
@@ -34,7 +45,7 @@ int main (int argc, char *argv[]) {
 
   adresse.sin_family= AF_INET;
   adresse.sin_port= htons(port);
-  adresse.sin_addr.s_addr= htonl(INADDR_LOOPBACK);
+  // adresse.sin_addr.s_addr= htonl(address);
 
   // connect
   int rc = connect(server_desc, (struct sockaddr*)&adresse, sizeof(adresse));
