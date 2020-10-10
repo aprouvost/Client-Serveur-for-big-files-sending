@@ -30,7 +30,7 @@ int main (int argc, char *argv[]) {
   int port = atoi(argv[1]), valid = 1, recv_len, serv_desc_TCP, serv_desc_UDP;
   char buffer[RCVSIZE];
   struct sockaddr_in TCPaddr, UDPaddr, client;
-  socklen_t alen = sizeof(client);
+  socklen_t alen;
 
   // Create socket
 
@@ -95,7 +95,7 @@ int main (int argc, char *argv[]) {
 
     if(FD_ISSET(serv_desc_TCP, &sock_set)){ // TCP
       printf("C'est du TCP qui passe\n ");
-      // socklen_t tcplen = sizeof(TCPaddr);
+      alen = sizeof(client);
       int client_desc = accept(serv_desc_TCP, (struct sockaddr*)&client, &alen);
       printf("Value of accept is:%d\n", client_desc);
 
@@ -118,7 +118,7 @@ int main (int argc, char *argv[]) {
 
     if(FD_ISSET(serv_desc_UDP, &sock_set)){ // UDP
       printf("C'est de l'UDP qui passe \n" );
-      // socklen_t udplen = sizeof(UDPaddr);
+      alen = sizeof(client);
       bzero(buffer, sizeof(buffer));
       printf("Receiving UDP message from client : \n" );
       if((recv_len = recvfrom(serv_desc_UDP, buffer, RCVSIZE, 0, (struct sockaddr *) &client, &alen)) == -1){

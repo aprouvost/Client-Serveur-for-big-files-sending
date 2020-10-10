@@ -28,7 +28,7 @@ int main (int argc, char *argv[]) {
   }
 
   struct sockaddr_in adresse;
-  int port= atoi(argv[1]);
+  int port= atoi(argv[2]);
   int res = inet_aton(argv[1], &adresse.sin_addr);
   if (res < 0){
     printf("Incompatible ip address");
