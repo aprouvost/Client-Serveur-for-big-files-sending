@@ -1,40 +1,64 @@
-#include <stdio.h>
-#include <stdlib.h>
+/*
+	Simple udp client
+*/
+#include<stdio.h>	//printf
+#include<string.h> //memset
+#include<stdlib.h> //exit(0);
+#include<arpa/inet.h>
+#include<sys/socket.h>
 #include <unistd.h>
-#include <string.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/select.h>
+#include <sys/time.h>
 
-#define PORT     4567
-#define MAXLINE 1024
+#define BUFLEN 512	//Max length of buffer
 
-// Driver code
-int main() {
-    int sockfd;
-    char *hello = "Hello from client";
-    struct sockaddr_in     servaddr;
+void die(char *s)
+{
+	perror(s);
+	exit(1);
+}
 
-    // Creating socket file descriptor
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
-        perror("socket creation failed");
-        exit(EXIT_FAILURE);
-    }
+int main (int argc, char *argv[]) {
 
-    memset(&servaddr, 0, sizeof(servaddr));
+  if (argc < 3){
+    printf("2 arg needed, <@ip> <port> \n");
+    return -1;
+  }
 
-    // Filling server information
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr = INADDR_ANY;
+  struct sockaddr_in adresse;
+  int port= atoi(argv[1]);
+  int res = inet_aton(argv[1], &adresse.sin_addr);
+  if (res < 0){
+    printf("Incompatible ip address");
+    exit(EXIT_FAILURE);
+  }
 
+	int s, slen=sizeof(adresse);
+	char message[BUFLEN];
 
-    sendto(sockfd, (const char *)hello, strlen(hello),
-        MSG_CONFIRM, (const struct sockaddr *) &servaddr,
-            sizeof(servaddr));
-    printf("Hello message sent.\n");
+	if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+	{
+		die("socket");
+	}
 
-    close(sockfd);
-    return 0;
+	memset((char *) &adresse, 0, sizeof(adresse));
+	adresse.sin_family = AF_INET;
+	adresse.sin_port = htons(port);
+
+	while(1)
+	{
+		printf("Enter message : ");
+		fgets(message, BUFLEN, stdin);
+
+		//send the message
+		if (sendto(s, message, strlen(message) , 0 , (struct sockaddr *) &adresse, slen)==-1)
+		{
+			die("sendto()");
+		}
+	}
+
+	close(s);
+	return 0;
 }

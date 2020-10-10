@@ -9,9 +9,16 @@
 #include <sys/time.h>
 #include <arpa/inet.h>
 
-
 #define RCVSIZE 1024
 #define MAXLINE 1024
+
+int max(int x, int y)
+{
+    if (x > y)
+        return x;
+    else
+        return y;
+}
 
 int main (int argc, char *argv[]) {
 
@@ -20,128 +27,110 @@ int main (int argc, char *argv[]) {
     return -1;
   }
 
-  struct sockaddr_in adresse, client, UDPaddr, cliaddr;
-  // int port= 5001;
-  int port= atoi(argv[1]);
-
-  int valid= 1;
-  socklen_t alen= sizeof(client);
+  int port = atoi(argv[1]), valid = 1, recv_len, serv_desc_TCP, serv_desc_UDP;
   char buffer[RCVSIZE];
+  struct sockaddr_in TCPaddr, UDPaddr, client;
+  socklen_t alen = sizeof(client);
 
-  //create socket
-  int server_desc = socket(AF_INET, SOCK_STREAM, 0);
+  // Create socket
 
-  int server_desc_udp = socket(AF_INET, SOCK_DGRAM, 0);
+  // TCP
 
-  //handle error
-  if (server_desc < 0 || server_desc_udp < 0) {
-    perror("Cannot create socket\n");
-    return -1;
+  if((serv_desc_TCP = socket(AF_INET, SOCK_STREAM, 0))  == -1){
+    perror("Cannot create TCP socket \n");
+    exit(EXIT_FAILURE);
   }
 
-  setsockopt(server_desc, SOL_SOCKET, SO_REUSEADDR, &valid, sizeof(int));
+  setsockopt(serv_desc_TCP, SOL_SOCKET, SO_REUSEADDR, &valid, sizeof(int));
 
-  adresse.sin_family= AF_INET;
-  adresse.sin_port= htons(port);
-  adresse.sin_addr.s_addr= htonl(INADDR_ANY);
+  TCPaddr.sin_family = AF_INET;
+  TCPaddr.sin_port = htons(port);
+  TCPaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  //initialize socket
-  if (bind(server_desc, (struct sockaddr*) &adresse, sizeof(adresse)) == -1) {
-    perror("Bind failed\n");
-    close(server_desc);
-    return -1;
+  if (bind(serv_desc_TCP, (struct sockaddr*) &TCPaddr, sizeof(TCPaddr)) == -1){
+    perror("TCP bind failed \n");
+    close(serv_desc_TCP);
+    exit(EXIT_FAILURE);
   }
 
-
-  memset(&UDPaddr, 0, sizeof(UDPaddr));
-  memset(&cliaddr, 0, sizeof(cliaddr));
-
-  // Socket udp
-  UDPaddr.sin_family= AF_INET;
-  UDPaddr.sin_addr.s_addr= INADDR_ANY;
-  UDPaddr.sin_port = htons(4567);
-
-
-  if (bind(server_desc_udp, (struct sockaddr*) &UDPaddr, sizeof(UDPaddr)) == -1){
-    perror("Bind failed \n");
-    close(server_desc_udp);
-    return -1;
+  if(listen(serv_desc_TCP, 0 ) < 0){
+    printf("TCP listen failed\n");
+    exit(EXIT_FAILURE);
   }
 
+  printf("Listen done \n");
 
-  //listen to incoming clients
-  if (listen(server_desc, 0) < 0) {
-    printf("Listen failed tcp\n");
-    return -1;
+  //UDP
+
+  if((serv_desc_UDP = socket(AF_INET, SOCK_DGRAM, 0))  == -1){
+    perror("Cannot create UDP socker \n");
+    exit(EXIT_FAILURE);
   }
 
-  printf("Listen done\n");
+  memset((char *) &UDPaddr, 0, sizeof(UDPaddr));
 
+  UDPaddr.sin_family = AF_INET;
+  UDPaddr.sin_port = htons(4545);
+  UDPaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+  if(bind(serv_desc_UDP, (struct sockaddr*)&UDPaddr, sizeof(UDPaddr)) == -1){
+    perror("UDP bind failed \n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Select initialize
   fd_set sock_set;
-  //int timeout = 5;
-  //truct timeval select_timeout;
-  //select_timeout.tv_sec = timeout;
-  //select_timeout.tv_usec = 0;
-
   FD_ZERO(&sock_set);
+  int maxfdp1 = max(serv_desc_TCP, serv_desc_UDP) + 1;
 
   while (1) {
 
+    printf("Waiting for data \n");
 
-    FD_SET(server_desc_udp, &sock_set);
-    FD_SET(server_desc, &sock_set);
+    // Select set up
+    FD_SET(serv_desc_TCP, &sock_set);
+    FD_SET(serv_desc_UDP, &sock_set);
 
+    select(maxfdp1, &sock_set, NULL, NULL, NULL);
 
-    int max_input = 4;
-    select(max_input, &sock_set, NULL, NULL, NULL);
-    if (FD_ISSET(server_desc_udp, &sock_set)){ // si c'est de l'UDP
-      printf("C'est de l'UDP qui passe \n" );
-
-      //lecture du message
-      int len, n;
-
-      len = sizeof(cliaddr);  //len is value/resuslt
-
-      n = recvfrom(server_desc_udp, (char *)buffer, MAXLINE,
-                  MSG_WAITALL, ( struct sockaddr *) &cliaddr,
-                  &len);
-      buffer[n] = '\0';
-      printf("Client : %s\n", buffer);
-
-    }
-
-
-    if (FD_ISSET(server_desc, &sock_set)){ // si c'est de l'UDP
-      printf("C'est du TCP qui passe \n" );
-
-      int client_desc = accept(server_desc, (struct sockaddr*)&client, &alen);
+    if(FD_ISSET(serv_desc_TCP, &sock_set)){ // TCP
+      printf("C'est du TCP qui passe\n ");
+      // socklen_t tcplen = sizeof(TCPaddr);
+      int client_desc = accept(serv_desc_TCP, (struct sockaddr*)&client, &alen);
       printf("Value of accept is:%d\n", client_desc);
 
       int pid = fork();
-
+      if (pid==0){
+        close(serv_desc_TCP);
+        bzero(buffer, sizeof(buffer));
+        printf("Message TCP from client\n" );
+        read(client_desc, buffer, RCVSIZE);
+        printf("data: %s\n", buffer);
+        close(client_desc);
+        exit(0);
+      }
       if (pid<0){
         printf(" Error for fork function ");
         exit(EXIT_FAILURE);
-      } else if (pid == 0){
-        printf("Socket value after accepted: %d \n", client_desc);
-        close(server_desc);
-        int msgSize = read(client_desc,buffer,RCVSIZE);
-        while (msgSize > 0) {
-          write(client_desc,buffer,msgSize);
-          printf("%s",buffer);
-          memset(buffer,0,RCVSIZE);
-          msgSize = read(client_desc,buffer,RCVSIZE);
-        }
-        printf("Ending process");
-        exit(EXIT_SUCCESS);
-      }else if (pid > 0){
-        close(client_desc);
       }
     }
-    //printf("Accepting\n");
-    //printf("Socket value on Server side: %d \n", server_desc);
-  }
 
-//close(server_desc);
+
+    if(FD_ISSET(serv_desc_UDP, &sock_set)){ // UDP
+      printf("C'est de l'UDP qui passe \n" );
+      // socklen_t udplen = sizeof(UDPaddr);
+      bzero(buffer, sizeof(buffer));
+      printf("Receiving UDP message from client : \n" );
+      if((recv_len = recvfrom(serv_desc_UDP, buffer, RCVSIZE, 0, (struct sockaddr *) &client, &alen)) == -1){
+        perror("recvfrom failed \n");
+        exit(EXIT_FAILURE);
+      }
+
+      printf("DATA: %s\n", buffer);
+    }
+  }
+  close(serv_desc_TCP);
+  //close(serv_desc_UDP);
+printf("Ending programm\n" );
 return 0;
 }
