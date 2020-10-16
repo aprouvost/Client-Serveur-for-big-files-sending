@@ -72,21 +72,58 @@ int main(void)
     {
       die("sendto()");
     }
-		printf("Received ACK");
 	}
 
 
-	while(1)
+	//Receiving the new port number from server to start data stream on new socket
+  memset(buf, 0, sizeof(buf));
+	char port_data;
+	printf("Waiting for port new number\n");
+	if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1)
 	{
-		printf("Enter message : ");
-		fgets(message, BUFLEN, stdin);
+		die("recvfrom()");
+	}
+	else{
+		close(s);
+		int port_value;
+		sscanf(buf, "%d", &port_value);
 
-		//send the message
-		if (sendto(s, message, strlen(message) , 0 , (struct sockaddr *) &si_other, slen)==-1)
+		printf("%d\n", port_value );
+		struct sockaddr_in si_data;
+		int s_data, recv_len_data;
+	  socklen_t slen_data=sizeof(si_other);
+		char message_data[BUFLEN];
+	  char buf_data[BUFLEN];
+
+		//socket s_data is used to send the data stream, on port port_data
+		if ( (s_data=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 		{
-			die("sendto()");
+			die("socket");
+		}
+
+		memset((char *) &si_data, 0, sizeof(si_data));
+		si_data.sin_family = AF_INET;
+		si_data.sin_port = htons(port_value);
+
+		if (inet_aton(SERVER , &si_data.sin_addr) == 0)
+		{
+			fprintf(stderr, "inet_aton() failed\n");
+			exit(1);
+		}
+
+		while(1)
+		{
+			printf("Enter message : ");
+			fgets(message_data, BUFLEN, stdin);
+
+			//send the message
+			if (sendto(s_data, message_data, strlen(message_data) , 0 , (struct sockaddr *) &si_data, slen_data)==-1)
+			{
+				die("sendto()");
+			}
 		}
 	}
+
 
 	close(s);
 	return 0;
