@@ -1,5 +1,9 @@
 .idea
 Client
 Server
-*.o
 ClientUDP
+*.o
+!TP3/src/client
+!TP3/src/server
+TP3/src/input
+TP3/src/output
