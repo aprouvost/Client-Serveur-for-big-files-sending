@@ -88,7 +88,7 @@ int main(void)
 		int port_value;
 		sscanf(buf, "%d", &port_value);
 
-		printf("%d\n", port_value );
+		printf("port new value received is %d\n", port_value );
 		struct sockaddr_in si_data;
 		int s_data, recv_len_data;
 	  socklen_t slen_data=sizeof(si_other);

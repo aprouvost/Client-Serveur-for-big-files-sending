@@ -17,3 +17,5 @@
 
 void die(char *s);
 int max(int x, int y);
+
+int handshake (char *type, int s, char buf[BUFLEN],  struct sockaddr_in si_other );

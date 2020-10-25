@@ -6,7 +6,8 @@
 
 int main(void){
     struct sockaddr_in si_other;
-    int s;
+    int s; // socket de contrôle
+    int s_data; //socket de flux de data
     socklen_t slen=sizeof(si_other);
     char message[BUFLEN];
 //    char buf[BUFLEN];
@@ -26,6 +27,13 @@ int main(void){
         exit(1);
     }
 
+
+    //handshake coté client
+
+    char *type = "client";
+    s_data = handshake(type, s, message, si_other );
+    close(s);
+
     while(1) {
 
         memset(message, 0, BUFLEN);
@@ -33,11 +41,11 @@ int main(void){
         gets(message, BUFLEN, stdin);
         printf("Send data : %s_\n", message);
 
-        if (sendto(s, message, strlen(message), 0, (struct sockaddr *) &si_other, slen) == -1) {
+        if (sendto(s_data, message, strlen(message), 0, (struct sockaddr *) &si_other, slen) == -1) {
             die("sendto()");
         }
     }
 
-    close(s);
+    close(s_data);
     return 0;
 }
