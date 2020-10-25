@@ -9,7 +9,7 @@ client.o: client.c
 server.o: server.c
 	gcc ${CFLAGS} -c server.c -o server.o
 
-main: clean client.o server.o
+main: clean ../client.o server.o
 	gcc ${LDFLAGS} client.o -o Client
 	gcc ${LDFLAGS} server.o -o Server
 
