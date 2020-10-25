@@ -13,7 +13,12 @@ int main(void){
         die("Error in control socket creation");
     }
 
-
+    char *type = "server";
+    int val_handshake = handshake(type,control_socket, buf, addr_other);
+    if (handshake !=0){
+      printf("Error, handshake didn't work\n");
+      return -1;
+    }
     while (1){
         if ((recv_len = recvfrom(control_socket, buf, BUFLEN, 0, (struct sockaddr *) &addr_other, &slen)) == -1)
         {
@@ -22,4 +27,5 @@ int main(void){
         printf("Data: %s\n" , buf);
         memset(buf, 0, BUFLEN);
     }
+    return 0;
 }

@@ -10,6 +10,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
+#define SERVER "127.0.0.1"
+#define PORTDATA 6666
 
 void die(char *s)
 {
@@ -26,9 +28,9 @@ int max(int x, int y)
 }
 
 
-int handshake (char *type, int s, char buf[BUFLEN],  sockaddr_in si_other ){
-  char type_client="client";
-  char type_server="server";
+int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other ){
+  char *type_client="client";
+  char *type_server="server";
 
   //si l'entité est un client, il fait le handshake sur socket d'écoute
   //et reçoit
@@ -116,7 +118,9 @@ int handshake (char *type, int s, char buf[BUFLEN],  sockaddr_in si_other ){
     //----------------------------------------------------------------
     //fait passer msg de controle sur la socket d'écoute
     //pas besoin de select pour le moment
+    socklen_t slen=sizeof(si_other);
     printf("Waiting for SYN\n");
+    int recv_len;
     if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1)
     {
       die("recvfrom()");
