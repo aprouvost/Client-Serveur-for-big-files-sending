@@ -27,13 +27,6 @@ int main(void){
         exit(1);
     }
 
-
-    //handshake coté client
-
-    char *type = "client";
-    s_data = handshake(type, s, message, si_other );
-    close(s);
-
     while(1) {
 
         memset(message, 0, BUFLEN);
@@ -41,7 +34,7 @@ int main(void){
         gets(message, BUFLEN, stdin);
         printf("Send data : %s_\n", message);
 
-        if (sendto(s_data, message, strlen(message), 0, (struct sockaddr *) &si_other, slen) == -1) {
+        if (sendto(s, message, strlen(message), 0, (struct sockaddr *) &si_other, slen) == -1) {
             die("sendto()");
         }
     }
