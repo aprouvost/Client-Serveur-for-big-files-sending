@@ -10,9 +10,6 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#define SERVER "127.0.0.1"
-#define PORTDATA 6666
-
 void die(char *s)
 {
     perror(s);
@@ -29,8 +26,8 @@ int max(int x, int y)
 
 
 int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other ){
-  char *type_client="client";
-  char *type_server="server";
+  char type_client[]="client";
+  char type_server[]="server";
 
   //si l'entité est un client, il fait le handshake sur socket d'écoute
   //et reçoit
@@ -48,7 +45,7 @@ int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other
       die("sendto()");
     }
 
-    memset(buf, 0, sizeof(buf));
+    memset(buf, 0, BUFLEN);
     printf("Data: %s\n" , buf);
     printf("Waiting SYN-ACK\n");
 
@@ -71,49 +68,25 @@ int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other
 
 
     //Receiving the new port number from server to start data stream on new socket
-    memset(buf, 0, sizeof(buf));
-    char port_data;
+    int port_value = -1;
+    memset(buf, 0, BUFLEN);
     printf("Waiting for port new number\n");
     if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1)
     {
       die("recvfrom()");
     }
-    else{
-      close(s);
-      int port_value;
-      sscanf(buf, "%d", &port_value);
 
-      printf("port new value received is %d\n", port_value );
-      struct sockaddr_in si_data;
-      int s_data, recv_len_data;
-      socklen_t slen_data=sizeof(si_other);
-      char message_data[BUFLEN];
-      char buf_data[BUFLEN];
+    sscanf(buf, "%d", &port_value);
 
-      //socket s_data is used to send the data stream, on port port_data
-      if ( (s_data=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
-      {
-        die("socket");
-      }
+    printf("port new value received is %d\n", port_value );
 
-      memset((char *) &si_data, 0, sizeof(si_data));
-      si_data.sin_family = AF_INET;
-      si_data.sin_port = htons(port_value);
-
-      if (inet_aton(SERVER , &si_data.sin_addr) == 0)
-      {
-        fprintf(stderr, "inet_aton() failed\n");
-        exit(1);
-      }
-
-    }
     //retourne le nouveau port de création de la socket de data
-    return port_data;
+    return port_value;
   }
 
 
   //si c'est un serveur
-  if(strcmp(type, type_client) == 0){
+  if(strcmp(type, type_server) == 0){
 
     //----------------------------------------------------------------
     //fait passer msg de controle sur la socket d'écoute

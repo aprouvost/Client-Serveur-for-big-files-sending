@@ -13,6 +13,8 @@
 #define SYN "SYN"
 #define SYNACK "SYNACK"
 #define ACK "ACK"
+#define SERVER "127.0.0.1"
+#define PORTDATA 6666
 
 
 void die(char *s);

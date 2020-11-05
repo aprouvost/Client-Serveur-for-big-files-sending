@@ -2,7 +2,9 @@
 #include "../common/common.h"
 
 
-int UDPserver(int sock, struct sockaddr_in addr, int port) {
+int UDPserver(struct sockaddr_in addr, int port) {
+
+    int sock = -1;
 
     if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
         die("socket\n");
