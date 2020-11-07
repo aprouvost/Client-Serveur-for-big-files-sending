@@ -15,9 +15,10 @@
 #define ACK "ACK"
 #define SERVER "127.0.0.1"
 #define PORTDATA 6666
+#define GETIMGCOMMAND "getimg"
 
 
 void die(char *s);
 int max(int x, int y);
-
 int handshake (char *type, int s, char buf[BUFLEN],  struct sockaddr_in si_other );
+void clearBuf(char* b);

@@ -5,5 +5,5 @@ ClientUDP
 *.o
 !TP3/src/client
 !TP3/src/server
-TP3/src/input
-TP3/src/output
+TP3/input
+TP3/output

@@ -10,6 +10,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
+#define NET_BUF_SIZE 32
+
 void die(char *s)
 {
     perror(s);
@@ -24,6 +26,12 @@ int max(int x, int y)
         return y;
 }
 
+void clearBuf(char* b)
+{
+    int i;
+    for (i = 0; i < NET_BUF_SIZE; i++)
+        b[i] = '\0';
+}
 
 int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other ){
   char type_client[]="client";
@@ -65,8 +73,6 @@ int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other
         die("sendto()");
       }
     }
-
-
     //Receiving the new port number from server to start data stream on new socket
     int port_value = -1;
     memset(buf, 0, BUFLEN);
@@ -77,13 +83,11 @@ int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other
     }
 
     sscanf(buf, "%d", &port_value);
-
     printf("port new value received is %d\n", port_value );
 
     //retourne le nouveau port de création de la socket de data
     return port_value;
   }
-
 
   //si c'est un serveur
   if(strcmp(type, type_server) == 0){

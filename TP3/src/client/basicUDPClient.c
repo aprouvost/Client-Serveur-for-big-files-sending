@@ -1,4 +1,4 @@
-#include "../common/common.h"
+#include "imgreceiver.h"
 
 #define PORT 1234
 #define SERVER_ADDR "127.0.0.1"
@@ -55,11 +55,15 @@ int main(void){
 
         //memset(message, 0, BUFLEN);
         printf("Enter message : ");
-        fgets(message, BUFLEN, stdin);
+        gets(message, BUFLEN, stdin);
         printf("Send data : %s_\n", message);
 
         if (sendto(s_data, message, strlen(message), 0, (struct sockaddr *) &si_data, slen) == -1) {
             die("sendto()");
+        }
+
+        if(strcmp(message, GETIMGCOMMAND) == 0){
+          imgReceiver(s_data, si_data);
         }
         //close(s_data);
     }

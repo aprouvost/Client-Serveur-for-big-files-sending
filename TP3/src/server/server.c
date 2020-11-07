@@ -1,6 +1,5 @@
 #include "UDPserver.h"
-#include "../common/common.h"
-
+#include "imgsender.h"
 
 int main(void){
     struct sockaddr_in addr, addr_other;
@@ -36,6 +35,10 @@ int main(void){
             die("recvfrom()");
         }
         printf("Data: %s\n" , buf);
+
+        if(strcmp(buf, GETIMGCOMMAND) == 0){
+          imageSender (data_socket, "chaton.jpg", addr_other);
+        }
         memset(buf, 0, BUFLEN);
     }
     return 0;
