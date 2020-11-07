@@ -30,6 +30,7 @@ int imgReceiver(int chaussette, struct sockaddr_in addr){
 
  int sizeCheck = 0;
 
+ printf("Receiving file ...\n");
  if(sizeCheck < taille){
    while (sizeCheck < taille) {
      receivedBytes = recvfrom(chaussette, buffer, BUFLEN, 0, (struct sockaddr *)&addr, &slen);
@@ -50,7 +51,6 @@ int imgReceiver(int chaussette, struct sockaddr_in addr){
   }
 
   fclose(myFile);
-  close(chaussette);
   return 0;
 
 

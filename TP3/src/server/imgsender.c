@@ -34,6 +34,7 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
     printf("Waitting for ACK\n");
     recvfrom(chaussette,buffer,BUFLEN,0,  (struct sockaddr *)&addr_serv, &slen);
     if(strcmp(buffer, ACK) == 0){
+      printf("Sending file ...\n");
       if(taille > BUFLEN){
         while (sizeCheck < taille) {
           readBytes = fread(buffer, 1, 256,picture);
@@ -52,7 +53,6 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
     }
 
     fclose(picture);
-    close(chaussette);
     return 0;
     }
   }
