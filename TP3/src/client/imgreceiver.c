@@ -34,10 +34,17 @@ int imgReceiver(int chaussette, struct sockaddr_in addr){
  if(sizeCheck < taille){
    while (sizeCheck < taille) {
      receivedBytes = recvfrom(chaussette, buffer, BUFLEN, 0, (struct sockaddr *)&addr, &slen);
+
+     // sending ACK to server
+     printf("Sending ACK\n");
+     sendto(chaussette, ACK, sizeof(ACK), 0, (struct sockaddr *)&addr, slen);
+
+     //writting datas in file
      writtenBytes = fwrite(buffer, 1, receivedBytes, myFile);
      fflush(myFile);
      sizeCheck += writtenBytes;
    }
+   
  } else {
    receivedBytes = recvfrom(chaussette, buffer, BUFLEN, 0, (struct sockaddr *)&addr, &slen);
    fwrite(buffer, 1, receivedBytes, myFile);
