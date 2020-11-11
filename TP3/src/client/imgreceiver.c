@@ -55,20 +55,3 @@ int imgReceiver(int chaussette, struct sockaddr_in addr){
 
 
 }
-  // while (taille > 0) {
-  //   if (recvfrom(chaussette,file_buffer,BUFLEN,0,  (struct sockaddr *)&addr, &slen) == -1)
-  //     {
-  //       die("error while recieving file\n");
-  //     }
-  //
-  //   char new_file[]="output/copied.jpg";
-  //   strcat(new_file,file_buffer);
-  //   FILE *fp;
-  //   fp=fopen(new_file,"w+");
-  //   if(fwrite(file_buffer,1,sizeof(file_buffer),fp)<0)
-  //     {
-  //       die("error while writting file\n");
-  //     }
-  //
-  //   taille = taille - BUFLEN;
-  // }

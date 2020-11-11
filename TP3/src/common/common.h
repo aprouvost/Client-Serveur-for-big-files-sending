@@ -15,6 +15,7 @@
 #define ACK "ACK"
 #define SERVER "127.0.0.1"
 #define PORTDATA 6666
+#define PORTCONTROL 1234
 #define GETIMGCOMMAND "getimg"
 
 

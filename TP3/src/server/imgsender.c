@@ -57,24 +57,3 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
     }
   }
 }
-
-  //   //malloc the buffer big enough for image data
-  //
-  //   buffer = (char*) malloc (taille);
-  //   //read image data into buffer
-  //   fread (buffer,1,taille,picture);
-  //   int rc = sendto(chaussette, buffer, sizeof(buffer)+1, 0, (struct sockaddr *) &addr_serv, slen);
-  //   clearBuf(buffer);
-  //
-  //   if(rc<0) {
-  //     printf("cannot send data \n");
-  //     close(chaussette);
-  //     exit(1);
-  //   }
-  //   return(0);
-  //
-  // }else{
-  //   printf("Erreur lors de l'ouverture du fichier\n" );
-  //   exit(1);
-  // }
-  // return(-1);

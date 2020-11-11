@@ -1,11 +1,8 @@
 #include "imgreceiver.h"
 
-#define PORT 1234
-#define SERVER_ADDR "127.0.0.1"
-
 
 int main(void){
-    struct sockaddr_in si_other, si_data;
+    struct sockaddr_in si_other;
     int s; // socket de contrôle
     int s_data; //socket de flux de data
     socklen_t slen=sizeof(si_other);
@@ -19,9 +16,9 @@ int main(void){
 
     memset((char *) &si_other, 0, sizeof(si_other));
     si_other.sin_family = AF_INET;
-    si_other.sin_port = htons(PORT);
+    si_other.sin_port = htons(PORTCONTROL);
 
-    if (inet_aton(SERVER_ADDR , &si_other.sin_addr) == 0)
+    if (inet_aton(SERVER , &si_other.sin_addr) == 0)
     {
         fprintf(stderr, "inet_aton() failed\n");
         exit(1);
@@ -41,15 +38,7 @@ int main(void){
         die("socket");
     }
 
-    memset((char *) &si_data, 0, sizeof(si_data));
-    si_data.sin_family = AF_INET;
-    si_data.sin_port = htons(port_data);
-
-    if (inet_aton(SERVER_ADDR , &si_data.sin_addr) == 0)
-    {
-        fprintf(stderr, "inet_aton() failed\n");
-        exit(1);
-    }
+    si_other.sin_port = htons(port_data);
 
     while(1) {
 
@@ -58,12 +47,12 @@ int main(void){
         gets(message, BUFLEN, stdin);
         printf("Send data : %s_\n", message);
 
-        if (sendto(s_data, message, strlen(message), 0, (struct sockaddr *) &si_data, slen) == -1) {
+        if (sendto(s_data, message, strlen(message), 0, (struct sockaddr *) &si_other, slen) == -1) {
             die("sendto()");
         }
 
         if(strcmp(message, GETIMGCOMMAND) == 0){
-          imgReceiver(s_data, si_data);
+          imgReceiver(s_data, si_other);
         }
         //close(s_data);
     }

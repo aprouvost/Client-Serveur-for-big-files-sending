@@ -47,8 +47,7 @@ int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other
 
     // Connexion
     printf("Sending SYN\n");
-    char *message_sin = "SYN";
-    if (sendto(s, message_sin, strlen(message_sin) , 0 , (struct sockaddr *) &si_other, slen)==-1)
+    if (sendto(s, SYN, strlen(SYN) , 0 , (struct sockaddr *) &si_other, slen)==-1)
     {
       die("sendto()");
     }
@@ -62,13 +61,11 @@ int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other
       die("recvfrom()");
     }
     printf("Data: %s\n" , buf);
-    char syn_ack_msg[] = "SYN-ACK";
-    if(strcmp(buf, syn_ack_msg) == 0){
+    if(strcmp(buf, SYNACK) == 0){
       printf("SYN-ACK received\n");
 
-      char *ack = "ACK";
       printf("Sending ACK \n");
-      if (sendto(s, ack, strlen(ack) , 0 , (struct sockaddr *) &si_other, slen)==-1)
+      if (sendto(s, ACK, strlen(ACK) , 0 , (struct sockaddr *) &si_other, slen)==-1)
       {
         die("sendto()");
       }
@@ -104,12 +101,10 @@ int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other
     }
     printf("SYN received\n");
     printf("Data: %s\n" , buf);
-    char syn_msg[] = "SYN";
-    if(strcmp(buf, syn_msg) == 0){
+    if(strcmp(buf, SYN) == 0){
       // Send SYN-ACK
-      char syn_ack_msg[] = "SYN-ACK";
-      printf("Sending SYN-ACK : %s\n", syn_ack_msg);
-      if (sendto(s, syn_ack_msg, strlen(syn_ack_msg) , 0 , (struct sockaddr *) &si_other, slen)==-1)
+      printf("Sending SYN-ACK : %s\n", SYNACK);
+      if (sendto(s, SYNACK, strlen(SYNACK) , 0 , (struct sockaddr *) &si_other, slen)==-1)
       {
         die("sendto()");
       }
@@ -123,8 +118,7 @@ int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other
       {
         die("recvfrom()");
       }
-      char ack_msg[] = "ACK";
-      if(strcmp(buf, ack_msg)==0){
+      if(strcmp(buf, ACK)==0){
         printf("ACK received\n" );
 
         //senfing to client the new port number for the data
