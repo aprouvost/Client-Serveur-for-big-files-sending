@@ -11,6 +11,14 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
   char path[] = "input/";
   struct timeval current_time;
   struct timeval time_checked;
+  struct timeval final_time;
+  int retrans = 0;
+  double expired = 1100.0;
+  long double diff = 0;
+
+  gettimeofday(&final_time, NULL);
+  long double final = final_time.tv_sec;
+
 
 
   strcat(path,filePath);
@@ -45,17 +53,19 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
           readBytes = fread(buffer, 1, 256,picture);
           sentBytes = sendto(chaussette, buffer, readBytes, 0, (struct sockaddr *) &addr_serv, slen);
 
-          int received = -1;
           gettimeofday(&time_checked, NULL);
-          long double checked = time_checked.tv_sec;
-          gettimeofday(&current_time, NULL);
-          long double current = current_time.tv_sec;
+          long double checked = time_checked.tv_usec;
 
-          double expired = 2.0;
-          long double diff = current_time- checked
+
           //attends ACK en réception avant passer au Byte suivant
-          
+          //printf("checked : %Lf\n", checked);
+          //printf("current : %Lf\n", current);
+
+
           while ( diff < expired ){
+            gettimeofday(&current_time, NULL);
+            long double current = current_time.tv_usec;
+            diff = current - checked;
             recvfrom(chaussette,buffer,BUFLEN,0,  (struct sockaddr *)&addr_serv, &slen);
               if(strcmp(buffer, ACK) == 0){
                 diff = expired+ 100;
@@ -64,7 +74,7 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
               }
               else{
                 // on est dans les temps mais on n'a pas reçu d'ACK, on a reçu autre chose
-                printf("Expected receiving  ACK, received : %s\n", buffer );
+                printf("Expected receiving  ACK, received : %s\n\n", buffer );
               }
           }
 
@@ -72,7 +82,8 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
           // car on n'aura pas passé la ligne   sizeCheck += sentBytes;
           // donc sizeCheck sera toujours la même
 
-          printf("TIMEOUT, retransmitting \n");
+          //printf("TIMEOUT, retransmitting \n");
+          retrans = retrans +1;
 
         }
 
@@ -85,6 +96,11 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
       // si tout a été envoyé
       if(taille == sizeCheck){
       printf("Success.\n");
+      gettimeofday(&final_time, NULL);
+      long double checked = final_time.tv_sec;
+      long double differencial = final - checked ;
+      printf("Took %Lf  seconds \n", differencial );
+      printf("Had a total of %d retransmissions \n", retrans);
     } else{
       printf("Fail.\n");
     }
@@ -93,4 +109,5 @@ int imageSender (int chaussette,  char *filePath, struct sockaddr_in addr_serv){
     return 0;
     }
   }
+  return 0;
 }

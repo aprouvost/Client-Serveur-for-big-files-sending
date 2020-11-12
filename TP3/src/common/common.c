@@ -10,8 +10,6 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#define NET_BUF_SIZE 32
-
 void die(char *s)
 {
     perror(s);
@@ -24,13 +22,6 @@ int max(int x, int y)
         return x;
     else
         return y;
-}
-
-void clearBuf(char* b)
-{
-    int i;
-    for (i = 0; i < NET_BUF_SIZE; i++)
-        b[i] = '\0';
 }
 
 int handshake (char *type, int s, char buf[BUFLEN], struct  sockaddr_in si_other ){

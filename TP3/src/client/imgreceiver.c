@@ -36,7 +36,7 @@ int imgReceiver(int chaussette, struct sockaddr_in addr){
      receivedBytes = recvfrom(chaussette, buffer, BUFLEN, 0, (struct sockaddr *)&addr, &slen);
 
      // sending ACK to server
-     printf("Sending ACK\n");
+     //printf("Sending ACK\n");
      sendto(chaussette, ACK, sizeof(ACK), 0, (struct sockaddr *)&addr, slen);
 
      //writting datas in file
@@ -44,7 +44,7 @@ int imgReceiver(int chaussette, struct sockaddr_in addr){
      fflush(myFile);
      sizeCheck += writtenBytes;
    }
-   
+
  } else {
    receivedBytes = recvfrom(chaussette, buffer, BUFLEN, 0, (struct sockaddr *)&addr, &slen);
    fwrite(buffer, 1, receivedBytes, myFile);

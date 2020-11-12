@@ -9,8 +9,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#define BUFLEN 512	//Max length of buffer
-#define SYN "SYN"
+#define BUFLEN 65000	//Max length of buffer Max of udp packet
+#define SYN "SYNSYN"
 #define SYNACK "SYNACK"
 #define ACK "ACK"
 #define SERVER "127.0.0.1"
