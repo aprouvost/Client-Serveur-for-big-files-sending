@@ -3,7 +3,8 @@ Client
 Server
 ClientUDP
 *.o
+*.jpg
+Thumbs.db
 !TP3/src/client
 !TP3/src/server
-TP3/input
-TP3/output
+!.gitkeep
