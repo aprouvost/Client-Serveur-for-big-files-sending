@@ -1,13 +1,20 @@
 import socket
 import Project.TCPoverUDP.common as Common
 import os
+import io
+import PIL.Image as Image
+#import emoji
+import time
+
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
 
 sock = socket.socket(socket.AF_INET,  # Internet
                      socket.SOCK_DGRAM)  # UDP
 
-#Handshake
+# Handshake
 handshake_done = False
-sock.sendto(Common.SYN, (Common.UDP_IP, Common.UDP_PORT_CONTROL)) # Send SYN
+sock.sendto(Common.SYN, (Common.UDP_IP, Common.UDP_PORT_CONTROL))  # Send SYN
 data, addr = sock.recvfrom(Common.BUFFER)
 if data == Common.SYNACK + b" " + str(Common.UDP_PORT_DATA).encode('utf-8'):
     print(data)
@@ -21,7 +28,6 @@ else:
 
 print(f"Handshake {'done' if handshake_done else 'failed'}")
 
-
 if handshake_done:
     while True:
         message = input("Enter a string : ").encode('utf-8')
@@ -33,17 +39,24 @@ if handshake_done:
 
         # client demande image au serveur
         if message == Common.sendimg:
-            print("Send Nudes plz")
+            print("Waiting for server approval ... :thumbs_up: ")
             cop = "copy_"
             file_name_received, addr = sock.recvfrom(Common.BUFFER)
             file_size, addr = sock.recvfrom(Common.BUFFER)
-            file_name_received = cop +file_name_received
-            #creating new file
-            f = open(file_name_received, "x")
+            file_name_received = cop + file_name_received.decode("utf-8")
+            file_size = int(file_size.decode("utf-8"))
+            buf = bytearray()
 
+            print("Receiving.... Hold on ! ( And pray because this is UDP ) :pray_tone2:")
 
+            for data in range(file_size):
+                # receiving data on data socket
+                img_data, addr = sock.recvfrom(Common.BUFFER)
+                #buf.append(int(img_data.decode("utf-16")))
+                buf+=img_data
+                # sending ACK for received packet to server on control socket
+                sock.sendto(Common.ACK, (Common.UDP_IP, Common.UDP_PORT_CONTROL))
 
-
-
-
-
+            image = Image.open(io.BytesIO(buf))
+            image.save(file_name_received)
+            print("Received ! :heart_eyes: ")

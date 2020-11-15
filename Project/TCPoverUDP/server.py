@@ -1,6 +1,13 @@
 import socket
+
+import export as export
+
 import Project.TCPoverUDP.common as Common
 import os
+import time
+
+# import emoji
+
 
 print(os.getcwd())
 
@@ -34,7 +41,6 @@ else:
 
 print(f"Handshake {'done' if handshake_done else 'failed'}")
 
-# si serveur reçoit demande d'image, l'envoi au client
 while True:
     data, addr = sock_data.recvfrom(Common.BUFFER)
     print("received message: %s" % data)
@@ -43,20 +49,40 @@ while True:
         print("Sending bye")
         sock_data.sendto(Common.aurevoir, addr)
     if data == Common.sendimg:
-        file_name = input(
-            "File requested, which File do you want to send ? (plz enter the extension : ex .jpg) :").encode('utf-8')
-        f = open(file_name, mode="rb").read()
-        buf = [f[k * Common.BUFFER:(k + 1) * Common.BUFFER] for k in range((len(f) // Common.BUFFER) + 1)]
-        # envoi le nom du fichier
-        sock_data.sendto(file_name, addr)
-        # envoie la taille du fichier
-        sock_data.sendto(str(len(buf)).encode('utf-8'), addr)
+        valid = False
+        while not valid:
+            file_name = input(
+                "File requested, which File do you want to send ? (plz enter the extension : ex .jpg) :").encode(
+                'utf-8')
+            try:
+                f = open(file_name, mode="rb").read()
+                buf = [f[k * Common.BUFFER:(k + 1) * Common.BUFFER] for k in range((len(f) // Common.BUFFER) + 1)]
+                sock_data.sendto(file_name, addr)
+                sock_data.sendto(str(len(buf)).encode('utf-8'), addr)
+                valid = True
+            except FileNotFoundError:
+                print(" Hold on ! The file can't be found !")
+
+        print("Here we go ! Transmitting....")
         for data in buf:
-            print(data)
-            if sock_data.sendto(data, addr):
-                print("sending ...")
-                # attend confirmation d'un ACK de la part du client
-                rcv, addr = sock_control.recvfrom(Common.BUFFER)
-                if rcv == Common.ACK:
-                    continue
-        f.close()
+            transmitted = False
+            checked = time.time()
+            current = time.time()
+            while transmitted == False:
+
+                if sock_data.sendto(data, addr):
+                    # attend confirmation d'un ACK de la part du client
+
+                    while (current - checked) < 0.00000005:
+                        current = time.time()
+                        rcv, addr = sock_control.recvfrom(Common.BUFFER)
+                        if rcv == Common.ACK:
+                            transmitted = True
+                            break
+                        else:
+                            print("Mhm this is confusing. No clue what just happened. Received : " + str(rcv))
+
+                    if transmitted == False:
+                        print("Timeout, packet lost. Retransmitting....")
+
+        print("Sent with success ! :white_check_mark:")
