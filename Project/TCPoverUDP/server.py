@@ -4,7 +4,7 @@ import os
 
 print(os.getcwd())
 
-buf =1024
+buf = 1024
 print("Creating control socket")
 
 sock_control = socket.socket(socket.AF_INET,  # Internet
@@ -40,13 +40,16 @@ while True:
     print("received message: %s" % data)
     print(addr)
     if data == Common.bonjour:
+        print("Sending bye")
         sock_data.sendto(Common.aurevoir, addr)
     if data == Common.sendimg:
-        file_name = input("File requested, which File do you want to send ?").encode('utf-8')
+        file_name = input(
+            "File requested, which File do you want to send ? (plz enter the extension : ex .jpg) :").encode('utf-8')
         f = open(file_name, mode="rb").read()
-        buf = [f[k*Common.BUFFER:(k+1)*Common.BUFFER] for k in range((len(f)//Common.BUFFER)+1)]
-        #envoi le nom du fichier
+        buf = [f[k * Common.BUFFER:(k + 1) * Common.BUFFER] for k in range((len(f) // Common.BUFFER) + 1)]
+        # envoi le nom du fichier
         sock_data.sendto(file_name, addr)
+        # envoie la taille du fichier
         sock_data.sendto(str(len(buf)).encode('utf-8'), addr)
         for data in buf:
             print(data)

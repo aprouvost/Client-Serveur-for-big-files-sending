@@ -8,5 +8,5 @@ SYN = b"syn"
 SYNACK = b"synack"
 
 bonjour = b"hello"
-aurevoir = b"A bientot"
+aurevoir = b"Coucou toi !"
 sendimg = b"getimg"

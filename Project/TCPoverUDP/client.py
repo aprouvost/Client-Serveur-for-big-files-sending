@@ -1,5 +1,6 @@
 import socket
 import Project.TCPoverUDP.common as Common
+import os
 
 sock = socket.socket(socket.AF_INET,  # Internet
                      socket.SOCK_DGRAM)  # UDP
@@ -23,18 +24,26 @@ print(f"Handshake {'done' if handshake_done else 'failed'}")
 
 if handshake_done:
     while True:
-        message = input("Enter string").encode('utf-8')
+        message = input("Enter a string : ").encode('utf-8')
         sock.sendto(message, (Common.UDP_IP, port_data))
 
         if message == Common.bonjour:
             data, addr = sock.recvfrom(Common.BUFFER)
             print(f"Server say : {data}")
+
+        # client demande image au serveur
         if message == Common.sendimg:
             print("Send Nudes plz")
-            file_name, addr = sock.recvfrom(Common.BUFFER)
+            cop = "copy_"
+            file_name_received, addr = sock.recvfrom(Common.BUFFER)
             file_size, addr = sock.recvfrom(Common.BUFFER)
+            file_name_received = cop +file_name_received
+            #creating new file
+            f = open(file_name_received, "x")
 
 
 
 
-#client demande image au serveur
+
+
+
