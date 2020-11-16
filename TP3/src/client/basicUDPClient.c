@@ -1,6 +1,6 @@
 #include "imgreceiver.h"
 
-
+tototototototo
 int main(void){
     struct sockaddr_in si_other;
     int s; // socket de contrôle

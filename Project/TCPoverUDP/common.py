@@ -10,3 +10,7 @@ SYNACK = b"synack"
 bonjour = b"hello"
 aurevoir = b"Coucou toi !"
 sendimg = b"getimg"
+
+jpg = "jpg"
+pdf = "pdf"
+png = "png"
