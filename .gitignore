@@ -4,6 +4,9 @@ Server
 ClientUDP
 *.o
 *.jpg
+*.png
+*.pdf
+__pycache__
 Thumbs.db
 !TP3/src/client
 !TP3/src/server
