@@ -73,7 +73,7 @@ while True:
                 if sock_data.sendto(data, addr):
                     # attend confirmation d'un ACK de la part du client
 
-                    while (current - checked) < 0.00000005:
+                    while (current - checked) < 0.0000005:
                         current = time.time()
                         rcv, addr = sock_control.recvfrom(Common.BUFFER)
                         if rcv == Common.ACK:

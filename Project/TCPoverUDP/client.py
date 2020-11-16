@@ -6,6 +6,8 @@ import sys
 import PIL.Image as Image
 # import emoji
 import time
+import progressbar
+from alive_progress import alive_bar
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
 
@@ -39,32 +41,47 @@ if handshake_done:
 
         # client demande image au serveur
         if message == Common.sendimg:
+
             print("Waiting for server approval ... :thumbs_up: ")
             cop = "copy_"
             file_name_received, addr = sock.recvfrom(Common.BUFFER)
             file_size, addr = sock.recvfrom(Common.BUFFER)
             file_name_received = cop + file_name_received.decode("utf-8")
             extension = file_name_received.split(".")[1]
-            print(extension)
+            #print(extension)
             file_size = int(file_size.decode("utf-8"))
             buf = bytearray()
 
             print("Receiving.... Hold on ! ( And pray because this is UDP ) ")
 
+            widgets = [
+                ' [', progressbar.Timer(), '] ',
+                progressbar.Bar("=", "[", "]"),
+                ' (', progressbar.ETA(), ') ',
+            ]
+            checked = time.time()
+            print(checked)
+            pbar = progressbar.ProgressBar(maxval=file_size).start()
             for data in range(file_size):
                 # receiving data on data socket
                 img_data, addr = sock.recvfrom(Common.BUFFER)
                 # buf.append(int(img_data.decode("utf-16")))
                 buf += img_data
+                pbar.update(data)
                 # sending ACK for received packet to server on control socket
                 sock.sendto(Common.ACK, (Common.UDP_IP, Common.UDP_PORT_CONTROL))
+            pbar.finish()
+            ended = time.time()
+            print(ended)
+            print(ended-checked)
 
-        if extension == Common.jpg or extension == Common.png:
-            image = Image.open(io.BytesIO(buf))
-            image.save(file_name_received)
-            print("Image eceived ! :heart_eyes: ")
-        if extension == Common.pdf:
-            outfile = open(file_name_received, 'wb')
-            outfile.write(buf)
-            outfile.close()
-            print("PDF file received")
+            if extension == Common.jpg or extension == Common.png:
+                image = Image.open(io.BytesIO(buf))
+                image.save(file_name_received)
+                print("Image received ! :heart_eyes: ")
+
+            if extension == Common.pdf:
+                outfile = open(file_name_received, 'wb')
+                outfile.write(buf)
+                outfile.close()
+
