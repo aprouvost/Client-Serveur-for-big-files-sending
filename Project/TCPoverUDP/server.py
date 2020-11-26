@@ -1,8 +1,7 @@
 import socket
-
+import common as Common
 #import export as export
 
-import Project.TCPoverUDP.common as Common
 import os
 import time
 
@@ -68,7 +67,7 @@ while True:
             transmitted = False
             checked = time.time()
             current = time.time()
-            while transmitted == False:
+            while not transmitted:
 
                 if sock_data.sendto(data, addr):
                     # attend confirmation d'un ACK de la part du client
@@ -82,7 +81,7 @@ while True:
                         else:
                             print("Mhm this is confusing. No clue what just happened. Received : " + str(rcv))
 
-                    if transmitted == False:
+                    if not transmitted:
                         print("Timeout, packet lost. Retransmitting....")
 
         print("Sent with success ! :white_check_mark:")

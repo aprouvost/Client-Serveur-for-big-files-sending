@@ -1,19 +1,19 @@
 import socket
-import Project.TCPoverUDP.common as Common
+import common as Common
 import os
 import io
 import sys
-import PIL.Image as Image
+# import PIL.Image as Image
 # import emoji
 import time
 import progressbar
-from alive_progress import alive_bar
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
+# from alive_progress import alive_bar
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'  # Je sais pas ce que ca fou la ca ! ( c'est pas du django mdr)
 
 sock = socket.socket(socket.AF_INET,  # Internet
                      socket.SOCK_DGRAM)  # UDP
-
 # Handshake
 handshake_done = False
 sock.sendto(Common.SYN, (Common.UDP_IP, Common.UDP_PORT_CONTROL))  # Send SYN
@@ -47,8 +47,9 @@ if handshake_done:
             file_name_received, addr = sock.recvfrom(Common.BUFFER)
             file_size, addr = sock.recvfrom(Common.BUFFER)
             file_name_received = cop + file_name_received.decode("utf-8")
-            extension = file_name_received.split(".")[1]
-            #print(extension)
+            file_name_received = file_name_received.replace('/', '_').replace('..', '')
+            extension = file_name_received.split(".")[1]  # On peut faire un endswith
+            # print(extension)
             file_size = int(file_size.decode("utf-8"))
             buf = bytearray()
 
@@ -73,15 +74,18 @@ if handshake_done:
             pbar.finish()
             ended = time.time()
             print(ended)
-            print(ended-checked)
+            print(ended - checked)
 
-            if extension == Common.jpg or extension == Common.png:
-                image = Image.open(io.BytesIO(buf))
-                image.save(file_name_received)
+            if file_name_received.endswith(Common.jpg):  # Du coup le endswith on peut le faire directement ici
+                # image = Image.open(io.BytesIO(buf))  # Pk utiliser un lib image quand on peut ecrire un fichier binaire avec python directement ?
+                # image.save(file_name_received)       # Genre comme pour le pdf
+                print(file_name_received)
+                out = open(file_name_received, "wb")
+                out.write(buf)
+                out.close()
                 print("Image received ! :heart_eyes: ")
 
             if extension == Common.pdf:
                 outfile = open(file_name_received, 'wb')
                 outfile.write(buf)
                 outfile.close()
-

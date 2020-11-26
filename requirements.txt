@@ -1,1 +1,2 @@
 progressbar==2.5
+Pillow==8.0.1
