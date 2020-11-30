@@ -20,7 +20,6 @@ def recvFromClient(sock):
 def main(argv):
     print(os.getcwd())
 
-    buf = 1024
     print("Warning, launching server")
     print("Creating control socket")
 
