@@ -3,7 +3,7 @@ import re
 import socket
 
 
-def clientN_ack(sock, queue, lock):
+def clientN_ack(sock, queue):
     utils.init()
     print("Ack thread")
 
@@ -12,6 +12,7 @@ def clientN_ack(sock, queue, lock):
 
     #set time out
     sock.settimeout(0.0000005)
+
 
     while True:
         try:

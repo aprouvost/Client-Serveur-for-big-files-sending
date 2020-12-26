@@ -5,6 +5,7 @@ import queue
 import socket
 from clientNack import clientN_ack
 from clientNsender import clientN_sender
+import time
 
 
 def controlConnexion(sock, addr, ports, queue_ports):
@@ -22,9 +23,8 @@ def controlConnexion(sock, addr, ports, queue_ports):
     sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock_data.bind((utils.IP_ADDR, clientN_port))
     q = queue.Queue(maxsize=1)
-    lock = threading.Lock()
-    clientNsender = threading.Thread(target=clientN_sender, args=(sock_data, q, lock))
-    clientNack = threading.Thread(target=clientN_ack, args=(sock_data, q, lock))
+    clientNsender = threading.Thread(target=clientN_sender, args=(sock_data, q, addr))
+    clientNack = threading.Thread(target=clientN_ack, args=(sock_data, q))
 
     clientNsender.start()
     clientNack.start()
