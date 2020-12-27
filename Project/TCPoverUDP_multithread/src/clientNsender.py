@@ -30,7 +30,6 @@ def clientN_sender(sock, queue, addr):
             print("File found and opened successfully")
     except FileNotFoundError:
         print(" Hold on ! The file can't be found !")
-        # TODO : Est ce qu'on envoie au client qu'on a pas trouver le fichier avec un FIN ?
         utils.sendToClient(sock, addr, utils.FIN)
 
     # Envoi de la data au client
@@ -51,7 +50,7 @@ def clientN_sender(sock, queue, addr):
         # on regarde les ack
         try:
             last_ack = queue.get(block=True, timeout=RTT)
-            print(last_ack)
+            # print(last_ack)
             if last_ack == length_buf:
                 print("Taille atteinte")
                 break
@@ -74,3 +73,6 @@ def clientN_sender(sock, queue, addr):
     time.sleep(0.1)
     utils.sendToClient(sock, addr, utils.FIN)
     print("Debit : {:.4f} Mo/s".format(debit * 0.000001))
+    time.sleep(1)
+    print("exit")
+    exit(0)

@@ -3,16 +3,15 @@ import re
 import socket
 
 
-def clientN_ack(sock, queue):
+def clientN_ack(sock, queue, done):
     utils.init()
     print("Ack thread")
 
     last_sequence_ack = 1
     value_in_queue = 1
 
-    #set time out
+    # set time out
     sock.settimeout(0.0000005)
-
 
     while True:
         try:
@@ -27,11 +26,17 @@ def clientN_ack(sock, queue):
             if last_sequence_ack != value_in_queue:
                 value_in_queue = last_sequence_ack
                 queue.put(last_sequence_ack)
+        try:
+            if done.get(block=False):
+                break
+        except:
+            continue
 
         #Met à jour la variable globale pour récupérer le plus grand ACK
 
         # lock.acquire()
         # utils.last_ack = last_sequence_ack
         # lock.release()
-    # exit(0)
+    print("ACK finished")
+    exit(0)
 
