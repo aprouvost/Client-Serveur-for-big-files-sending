@@ -8,7 +8,7 @@ from clientNsender import clientN_sender
 from Test_performances import Test_performances
 
 
-def controlConnexion(sock, addr, ports, queue_ports):
+def controlConnexion(sock, addr, ports, queue_ports, default_RTT, win_size):
     unique = False
     while not unique:
         clientN_port = random.randint(1000, 9999)
@@ -23,8 +23,8 @@ def controlConnexion(sock, addr, ports, queue_ports):
     sock_data.bind((utils.IP_ADDR, clientN_port))
     q = queue.Queue(maxsize=1)
     done = queue.Queue(maxsize=1)
-    clientNsender = threading.Thread(target=clientN_sender, args=(sock_data, q, addr))
-    clientNack = threading.Thread(target=clientN_ack, args=(sock_data, q, done))
+    clientNsender = threading.Thread(target=clientN_sender, args=(sock_data, q, addr, default_RTT, win_size))
+    clientNack = threading.Thread(target=clientN_ack, args=(sock_data, q, done, default_RTT, win_size))
 
     clientNsender.start()
     clientNack.start()

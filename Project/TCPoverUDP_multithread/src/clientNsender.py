@@ -3,9 +3,11 @@ import os
 import time
 import socket
 from Test_performances import Test_performances
+import csv
+import pandas
 
 
-def clientN_sender(sock, queue, addr):
+def clientN_sender(sock, queue, addr, default_RTT, win_size):
     print("sender thread")
     # sock.settimeout(5)
 
@@ -31,10 +33,10 @@ def clientN_sender(sock, queue, addr):
 
     # Envoi de la data au client
     length_buf = len(buf)
-    c_window = 20
+    c_window = win_size
     last_ack = 1
     sequence = 1  # on commence a 1 sinon ca fait de la merde avec le client
-    RTT = 0.06
+    RTT = default_RTT
     time_start = time.perf_counter()
     # on envoie selon la congestion window
     tuples = []
@@ -76,4 +78,28 @@ def clientN_sender(sock, queue, addr):
     time.sleep(1)
     print("exit")
     Test_performances(tuples)
+
+    # Average window computing
+    tuples = pandas.DataFrame(tuples)
+    # check if csv output file already exists
+    try:
+        # if exists
+        tuples.to_csv('average_window_output.csv', mode='a', header=False)
+    except IOError:
+        # if doesn't exist
+        print("Creating output for average window file")
+        tuples.to_csv('average_window_output.csv', mode='w', header=False)
+
+    # Average debit computing
+    deb = [debit * 0.000001]
+    deb = pandas.DataFrame(deb)
+    # check if csv output file already exists
+    try:
+        # if exists
+        deb.to_csv('average_debit_output.csv', mode='a', header=False)
+    except IOError:
+        # if doesn't exist
+        print("Creating output for average debit file")
+        deb.to_csv('average_debit_output.csv', mode='w', header=False)
+
     return
