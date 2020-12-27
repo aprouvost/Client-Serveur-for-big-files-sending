@@ -2,6 +2,7 @@ import utils
 import os
 import time
 import socket
+from Test_performances import Test_performances
 
 
 def clientN_sender(sock, queue, addr):
@@ -74,4 +75,5 @@ def clientN_sender(sock, queue, addr):
     print("Debit : {:.4f} Mo/s".format(debit * 0.000001))
     time.sleep(1)
     print("exit")
-    exit(0)
+    Test_performances(tuples)
+    return

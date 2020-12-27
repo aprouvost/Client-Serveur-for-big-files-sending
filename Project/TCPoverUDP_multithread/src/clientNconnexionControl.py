@@ -5,6 +5,7 @@ import queue
 import socket
 from clientNack import clientN_ack
 from clientNsender import clientN_sender
+from Test_performances import Test_performances
 
 
 def controlConnexion(sock, addr, ports, queue_ports):
