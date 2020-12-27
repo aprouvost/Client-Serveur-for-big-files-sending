@@ -43,5 +43,5 @@ def controlConnexion(sock, addr, ports, queue_ports):
         done.put(True)
 
     clientNack.join()
-    exit(0)
+    return
 

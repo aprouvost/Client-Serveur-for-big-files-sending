@@ -1,10 +1,10 @@
 import utils
 import re
 import socket
+import queue
 
 
-def clientN_ack(sock, queue, done):
-    utils.init()
+def clientN_ack(sock, q, done):
     print("Ack thread")
 
     last_sequence_ack = 1
@@ -25,18 +25,13 @@ def clientN_ack(sock, queue, done):
             # envoyer au thread send la seq ack via une queue
             if last_sequence_ack != value_in_queue:
                 value_in_queue = last_sequence_ack
-                queue.put(last_sequence_ack)
+                q.put(last_sequence_ack)
         try:
             if done.get(block=False):
                 break
-        except:
+        except queue.Empty:
             continue
 
-        #Met à jour la variable globale pour récupérer le plus grand ACK
-
-        # lock.acquire()
-        # utils.last_ack = last_sequence_ack
-        # lock.release()
     print("ACK finished")
     exit(0)
 

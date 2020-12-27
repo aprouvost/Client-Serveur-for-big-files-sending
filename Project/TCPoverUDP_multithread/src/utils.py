@@ -1,16 +1,10 @@
 IP_ADDR = "0.0.0.0"  # To listen on all interfaces
-BUFFER = 1500 - 6  # Can up to 65 000 length of UP Packet ( -6 for sequence )
-
+BUFFER = 1500 - 6  # -6 for sequence
 
 ACK = "ACK"
 SYN = "SYN"
 SYN_ACK = "SYN-ACK"
 FIN = "FIN"
-
-
-def init():
-    global last_ack
-    last_ack = 0
 
 
 def recvFromClient(sock):

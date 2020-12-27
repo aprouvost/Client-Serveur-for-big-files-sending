@@ -1,14 +1,10 @@
 import utils
 import os
 import time
-import _queue
-import threading
-from clientNack import clientN_ack
 import socket
 
 
 def clientN_sender(sock, queue, addr):
-    utils.init()
     print("sender thread")
     # sock.settimeout(5)
 
@@ -41,7 +37,7 @@ def clientN_sender(sock, queue, addr):
     time_start = time.perf_counter()
     # on envoie selon la congestion window
     while True:
-        buf_window = buf[(sequence - 1):(sequence - 1) + c_window]
+        buf_window = buf[(sequence - 1):sequence + c_window]
         for data in buf_window:
             sequence = buf.index(data) + 1
             sequence = str(sequence).zfill(6).encode('utf-8')
