@@ -22,12 +22,12 @@ def controlConnexion(sock, addr, ports, queue_ports):
     sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock_data.bind((utils.IP_ADDR, clientN_port))
     q = queue.Queue(maxsize=1)
-    done = queue.Queue(maxsize=1)
+    # done = queue.Queue(maxsize=1)
     clientNsender = threading.Thread(target=clientN_sender, args=(sock_data, q, addr))
-    clientNack = threading.Thread(target=clientN_ack, args=(sock_data, q, done))
+    # clientNack = threading.Thread(target=clientN_ack, args=(sock_data, q, done))
 
     clientNsender.start()
-    clientNack.start()
+    # clientNack.start()
 
     # Fin du handshake
     #  envoyer le SYN-ACK0000
@@ -40,9 +40,9 @@ def controlConnexion(sock, addr, ports, queue_ports):
     #     data, _ = utils.recvFromClient(sock)
 
     clientNsender.join()
-    if not clientNsender.is_alive():
-        done.put(True)
-
-    clientNack.join()
+    # if not clientNsender.is_alive():
+    #     done.put(True)
+    #
+    # clientNack.join()
     return
 

@@ -2,12 +2,14 @@ import utils
 import os
 import time
 import socket
-from Test_performances import Test_performances
+import threading
+import queue
+from clientNack import clientN_ack
 
 
-def clientN_sender(sock, queue, addr):
+def clientN_sender(sock, q, addr):
     print("sender thread")
-    # sock.settimeout(5)
+    sock.settimeout(5)
 
     try:
         rcv_filename, _ = utils.recvFromClient(sock)
@@ -16,6 +18,10 @@ def clientN_sender(sock, queue, addr):
         print("No file was asked")
         utils.sendToClient(sock, addr, utils.FIN)
         exit(0)
+
+    done = queue.Queue(maxsize=1)
+    clientNack = threading.Thread(target=clientN_ack, args=(sock, q, done))
+    clientNack.start()
 
     current_path = os.getcwd()
     filename = current_path + "/../../input/" + rcv_filename  # TODO : changer pour que ca soit que la current dir pour le rendu
@@ -37,7 +43,6 @@ def clientN_sender(sock, queue, addr):
     RTT = 0.06
     time_start = time.perf_counter()
     # on envoie selon la congestion window
-    tuples = []
     while True:
         buf_window = buf[(sequence - 1):sequence + c_window]
         for data in buf_window:
@@ -47,18 +52,16 @@ def clientN_sender(sock, queue, addr):
 
         # on regarde les ack
         try:
-            last_ack = queue.get(block=True, timeout=RTT)
+            last_ack = q.get(block=True, timeout=RTT)
             # print(last_ack)
             if last_ack == length_buf:
                 print("Taille atteinte")
                 break
             else:
-                tuples.append(c_window, time.perf_counter())
                 sequence = last_ack + 1
                 c_window += 1
         except:
             print("Congestion detected, window size : " + str(c_window))
-            tuples.append(c_window, time.perf_counter())
             sequence = last_ack
             if c_window != 1:
                 c_window = int(c_window / 2)
@@ -75,5 +78,6 @@ def clientN_sender(sock, queue, addr):
     print("Debit : {:.4f} Mo/s".format(debit * 0.000001))
     time.sleep(1)
     print("exit")
-    Test_performances(tuples)
-    return
+    done.put(True)
+    clientNack.join()
+    exit(0)
