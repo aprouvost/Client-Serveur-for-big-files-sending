@@ -36,6 +36,7 @@ def clientN_sender(sock, queue, addr):
     RTT = 0.06
     time_start = time.perf_counter()
     # on envoie selon la congestion window
+    tuples = []
     while True:
         buf_window = buf[(sequence - 1):sequence + c_window]
         for data in buf_window:
@@ -51,10 +52,12 @@ def clientN_sender(sock, queue, addr):
                 print("Taille atteinte")
                 break
             else:
+                tuples.append(c_window, time.perf_counter())
                 sequence = last_ack + 1
                 c_window += 1
         except:
             print("Congestion detected, window size : " + str(c_window))
+            tuples.append(c_window, time.perf_counter())
             sequence = last_ack
             if c_window != 1:
                 c_window = int(c_window / 2)
