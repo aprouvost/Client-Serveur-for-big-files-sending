@@ -5,11 +5,14 @@ import socket
 from Test_performances import Test_performances
 import csv
 import pandas
+import threading
+import queue
+from clientNack import clientN_ack
 
 
-def clientN_sender(sock, queue, addr, default_RTT, win_size):
+def clientN_sender(sock, q, addr, default_RTT, win_size):
     print("sender thread")
-    # sock.settimeout(5)
+    sock.settimeout(5)
 
     try:
         rcv_filename, _ = utils.recvFromClient(sock)
@@ -18,6 +21,10 @@ def clientN_sender(sock, queue, addr, default_RTT, win_size):
         print("No file was asked")
         utils.sendToClient(sock, addr, utils.FIN)
         exit(0)
+
+    done = queue.Queue(maxsize=1)
+    clientNack = threading.Thread(target=clientN_ack, args=(sock, q, done))
+    clientNack.start()
 
     current_path = os.getcwd()
     filename = current_path + "/../../input/" + rcv_filename  # TODO : changer pour que ca soit que la current dir pour le rendu
@@ -49,7 +56,7 @@ def clientN_sender(sock, queue, addr, default_RTT, win_size):
 
         # on regarde les ack
         try:
-            last_ack = queue.get(block=True, timeout=RTT)
+            last_ack = q.get(block=True, timeout=RTT)
             # print(last_ack)
             if last_ack == length_buf:
                 print("Taille atteinte")
@@ -75,8 +82,7 @@ def clientN_sender(sock, queue, addr, default_RTT, win_size):
     time.sleep(0.1)
     utils.sendToClient(sock, addr, utils.FIN)
     print("Debit : {:.4f} Mo/s".format(debit * 0.000001))
-    time.sleep(1)
-    print("exit")
+
     Test_performances(tuples)
 
     # Average window computing
@@ -102,4 +108,8 @@ def clientN_sender(sock, queue, addr, default_RTT, win_size):
         print("Creating output for average debit file")
         deb.to_csv('average_debit_output.csv', mode='w', header=False)
 
+    time.sleep(1)
+    print("exit")
+    done.put(True)
+    clientNack.join()
     return
