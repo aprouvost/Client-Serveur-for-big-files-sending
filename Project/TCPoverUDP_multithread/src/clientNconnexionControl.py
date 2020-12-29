@@ -5,7 +5,6 @@ import queue
 import socket
 from clientNack import clientN_ack
 from clientNsender import clientN_sender
-from Test_performances import Test_performances
 
 
 def controlConnexion(sock, addr, ports, queue_ports, default_RTT, win_size):
@@ -23,7 +22,7 @@ def controlConnexion(sock, addr, ports, queue_ports, default_RTT, win_size):
     sock_data.bind((utils.IP_ADDR, clientN_port))
     q = queue.Queue(maxsize=1)
     # done = queue.Queue(maxsize=1)
-    clientNsender = threading.Thread(target=clientN_sender, args=(sock_data, q, addr))
+    clientNsender = threading.Thread(target=clientN_sender, args=(sock_data, q, addr, default_RTT, win_size))
     # clientNack = threading.Thread(target=clientN_ack, args=(sock_data, q, done))
 
     clientNsender.start()

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import csv
 import pandas as pd
 
-from Project.TCPoverUDP_multithread.src.main import mainThread
+# from Project.TCPoverUDP_multithread.src.main import mainThread
 
 
 def Test_performances(tuples):

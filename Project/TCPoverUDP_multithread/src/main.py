@@ -4,7 +4,7 @@ import argparse
 import threading
 import queue
 
-from Project.TCPoverUDP_multithread.src.Test_performances import get_average_deb
+# from Project.TCPoverUDP_multithread.src.Test_performances import get_average_deb
 from clientNconnexionControl import controlConnexion
 
 
@@ -36,19 +36,32 @@ def mainThread(public_port, queue_ports, ports_list, default_RTT, win_size):
 
 
 if __name__ == '__main__':
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("port", help="Server public port", type=int)
+    # args = parser.parse_args()
+    # default_RTT = 0.06
+    # iterations = int(input("Combien d'itérations voulez vous effectuer pour moyenner les valeurs ? : "))
+    # win_size = int(input("Quelle taille de window au démarrage ? : "))
+    # if win_size == 0:
+    #     win_size = 1
+    # for i in iterations:
+    #     if args.port:
+    #         ports_used = []
+    #         q_ports = queue.Queue()
+    #         ports = [args.port]
+    #         mainThread(args.port, q_ports, ports, default_RTT, win_size)
+    # deb_moyen = get_average_deb('average_debit_output.csv')
+    # print("Debit moyen : " + str(deb_moyen)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("port", help="Server public port", type=int)
     args = parser.parse_args()
-    default_RTT = 0.06
-    iterations = int(input("Combien d'itérations voulez vous effectuer pour moyenner les valeurs ? : "))
-    win_size = int(input("Quelle taille de window au démarrage ? : "))
-    if win_size == 0:
-        win_size = 1
-    for i in iterations:
-        if args.port:
-            ports_used = []
-            q_ports = queue.Queue()
-            ports = [args.port]
-            mainThread(args.port, q_ports, ports, default_RTT, win_size)
-    deb_moyen = get_average_deb('average_debit_output.csv')
-    print("Debit moyen : " + str(deb_moyen))
+
+    RTT = 0.06
+    window = 100
+
+    if args.port:
+        ports_used = []
+        q_ports = queue.Queue()
+        ports = [args.port]
+        mainThread(args.port, q_ports, ports, RTT, window)
