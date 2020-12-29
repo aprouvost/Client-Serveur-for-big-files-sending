@@ -8,6 +8,7 @@ ClientUDP
 *.pdf
 *.txt
 *.old
+*.zip
 __pycache__
 Thumbs.db
 !TP3/src/client

@@ -3,6 +3,7 @@ import os
 import time
 import socket
 from Test_performances import Test_performances
+import queue
 import csv
 import pandas
 import threading
@@ -61,18 +62,22 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
             if last_ack == length_buf:
                 print("Taille atteinte")
                 break
+            elif int(sequence) - last_ack > c_window:
+                print("Congestion detected, window size : " + str(c_window))
+                sequence = last_ack + 1
+                if c_window != 1:
+                    c_window = int(c_window / 2)
             else:
-                tuples.append(c_window, time.perf_counter())
                 sequence = last_ack + 1
                 c_window += 1
-        except:
+            tuples.append((c_window, time.perf_counter()))
+
+        except Exception as e:
             print("Congestion detected, window size : " + str(c_window))
-            tuples.append(c_window, time.perf_counter())
-            sequence = last_ack
+            tuples.append((c_window, time.perf_counter()))
+            sequence = last_ack + 1
             if c_window != 1:
                 c_window = int(c_window / 2)
-            if c_window == 0:
-                c_window = 1
 
     time_end = time.perf_counter()
     print(" File sent with success ")
