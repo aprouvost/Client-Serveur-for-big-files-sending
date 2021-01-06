@@ -11,7 +11,7 @@ def client(param):
     os.chdir(f"client3_{param}")
     print(os.getcwd())
     # os.chmod("client1", 0o755)
-    os.system(f"./client1 134.214.202.238 1234 DSC_0647.jpg >> client3_{param}.log")
+    os.system(f"./client1 134.214.203.30 2424 DSC_0647.jpg >> client3_{param}.log")
     return
 
 

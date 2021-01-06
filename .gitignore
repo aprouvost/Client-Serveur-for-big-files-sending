@@ -9,6 +9,7 @@ ClientUDP
 *.txt
 *.old
 *.zip
+*.tar.gz
 __pycache__
 Thumbs.db
 !TP3/src/client
