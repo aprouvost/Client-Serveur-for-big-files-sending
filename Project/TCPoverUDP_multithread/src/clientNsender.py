@@ -103,15 +103,16 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
 
     # Average debit computing
     deb = [debit * 0.000001]
-    deb = pandas.DataFrame(deb)
+    data = [(deb, default_RTT)]
+    out = pandas.DataFrame(data)
     # check if csv output file already exists
     try:
         # if exists
-        deb.to_csv('average_debit_output.csv', mode='a', header=False)
+        out.to_csv('average_debit_output.csv', mode='a', header=False)
     except IOError:
         # if doesn't exist
         print("Creating output for average debit file")
-        deb.to_csv('average_debit_output.csv', mode='w', header=False)
+        out.to_csv('average_debit_output_2.5Mo_window-130.csv', mode='w', header=False)
 
     time.sleep(1)
     print("exit")

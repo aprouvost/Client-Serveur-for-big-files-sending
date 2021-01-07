@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import socket
 import utils
 import argparse
@@ -50,8 +52,8 @@ if __name__ == '__main__':
     #         q_ports = queue.Queue()
     #         ports = [args.port]
     #         mainThread(args.port, q_ports, ports, default_RTT, win_size)
-    # deb_moyen = get_average_deb('average_debit_output.csv')
-    # print("Debit moyen : " + str(deb_moyen)
+    # deb_moyen = get_average_deb('average_debit_output_2.5Mo_window-130.csv')
+    # print("Debit moyen : " + str(deb_moyen))
 
     parser = argparse.ArgumentParser()
     parser.add_argument("port", help="Server public port", type=int)

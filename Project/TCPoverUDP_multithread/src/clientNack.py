@@ -31,7 +31,7 @@ def clientN_ack(sock, q, done):
                     q.get(block=False)
                 except queue.Empty:
                     pass
-                q.put(last_sequence_ack)
+                q.put(value_in_queue)
             try:
                 # print("funish ?")
                 if done.get(block=False):

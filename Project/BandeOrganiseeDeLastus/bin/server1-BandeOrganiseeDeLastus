@@ -1,0 +1,22 @@
+#! /usr/bin/python3
+
+import sys
+sys.path.append("..")
+
+import src
+import queue
+import argparse
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("port", help="Server public port", type=int)
+    args = parser.parse_args()
+
+    RTT = 0.06
+    window = 100
+
+    if args.port:
+        ports_used = []
+        q_ports = queue.Queue()
+        ports = [args.port]
+        src.mainThread(args.port, q_ports, ports, RTT, window)
