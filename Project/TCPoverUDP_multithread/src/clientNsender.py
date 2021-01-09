@@ -37,7 +37,7 @@ def clientN_sender(sock, q, addr):
     try:
         # with open(filename, 'rb') as file:
         # file = file.read()
-        with open(filename) as file:
+        with open(filename, buffering=0) as file:
             print("File found and opened successfully")
             file_size = os.stat(filename).st_size
             time_start = time.perf_counter()
