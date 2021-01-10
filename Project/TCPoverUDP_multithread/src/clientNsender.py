@@ -53,7 +53,7 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
         if c_window >= 1000:
             print("oops ca grandi trop")
             c_window = 500
-        buf_window = buf[(sequence - 2):sequence + c_window]
+        buf_window = buf[(sequence - 1):sequence + c_window]
         for data in buf_window:
             sequence_to_send = str(sequence).zfill(6).encode('utf-8')
             if data:
@@ -68,12 +68,14 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
                 print("Taille atteinte")
                 break
             else:
-                sequence = last_ack
+                sequence = last_ack + 1
                 c_window += 1
-                sequence_to_send = str(sequence).zfill(6).encode('utf-8')
-                to_send = buf[(sequence - 2):sequence + 10]
+                to_send = buf[(sequence - 1):sequence + 10]
                 for data in to_send:
-                    sock.sendto(sequence_to_send + data, addr)
+                    sequence_to_send = str(sequence).zfill(6).encode('utf-8')
+                    if data:
+                        sock.sendto(sequence_to_send + data, addr)
+                        sequence += 1
                 try:
                     last_ack = q.get(block=True, timeout=RTT)
                     # print(last_ack)
@@ -81,13 +83,11 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
                         print("Taille atteinte")
                         break
                     else:
-                        sequence = last_ack
+                        sequence = last_ack + 1
                         c_window += 1
                 except Exception as e:
                     raise e
             tuples.append((c_window, time.perf_counter()))
-            if sequence > 670000:
-                print(sequence, "/", length_buf)
 
         except Exception as e:
             print("rtt - Congestion detected, window size : " + str(c_window))
