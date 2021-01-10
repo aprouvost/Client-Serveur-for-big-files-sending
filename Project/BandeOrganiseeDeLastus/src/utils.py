@@ -1,5 +1,6 @@
 IP_ADDR = "0.0.0.0"  # To listen on all interfaces
 BUFFER = 1500 - 6  # -6 for sequence
+FILE_BUFFERED = 50000000  # 50 Mo
 
 ACK = "ACK"
 SYN = "SYN"

@@ -1,47 +1,40 @@
-#! /usr/bin/python3
-
-import socket
-from . import utils
-import argparse
 import threading
+import socket
 import queue
-from .clientNconnexionControl import controlConnexion
+from . import utils
+from .sender import sender
 
 
-def mainThread(public_port, queue_ports, ports_list, default_RTT, win_size):
-    # Socket creation on public port
+def mainThread(public_port, RTT, window):
+    ports_used = [public_port, ]
+    clients = []  # (client_addr, queue)
+    queue_ports = queue.Queue()
 
-    print("Creating control socket")
+    sock_control = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
 
-    # récupère les ports utilisés
-
-    sock_control = socket.socket(socket.AF_INET,
-                                 socket.SOCK_DGRAM)  # UDP
-
+    # Bind sur le port public
     sock_control.bind((utils.IP_ADDR, public_port))
+    print("Listening")
 
     while True:
-
+        # Ecoute tout le temps et creer un thread aux SYN
+        print("DEBUG - main : port list : ", ports_used)
         data, addr = utils.recvFromClient(sock_control)
-        # debut du handshake
+        # Debut du handshake
         if data == utils.SYN:
-            thread = threading.Thread(target=controlConnexion,
-                                      args=(sock_control, addr, ports_list, queue_ports, default_RTT, win_size))
-            thread.start()
-            item = queue_ports.get()
-            ports_list.append(item)
+            print("SYN recu")
+            queue_ack_handshake = queue.Queue()
+            client = threading.Thread(target=sender,
+                                      args=(sock_control, addr, ports_used, queue_ports, queue_ack_handshake, RTT, window))
+            clients.append((addr, queue_ack_handshake))
+            client.start()
 
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("port", help="Server public port", type=int)
-    args = parser.parse_args()
-
-    RTT = 0.06
-    window = 100
-
-    if args.port:
-        ports_used = []
-        q_ports = queue.Queue()
-        ports = [args.port]
-        mainThread(args.port, q_ports, ports, RTT, window)
+            try:
+                new_port = queue_ports.get(timeout=2)
+                ports_used.append(new_port)
+            except queue.Empty:
+                print("Une erreur est survenue lors de la creation du client, pas de port attribue")
+        if data == utils.ACK:
+            for cl in clients:
+                if addr == cl[0]:
+                    cl[1].put(utils.ACK)

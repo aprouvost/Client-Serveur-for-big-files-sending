@@ -12,6 +12,7 @@ if __name__ == '__main__':
     parser.add_argument("port", help="Server public port", type=int)
     args = parser.parse_args()
 
+    # TODO : A changer
     RTT = 0.06
     window = 100
 

@@ -4,19 +4,23 @@ import sys
 sys.path.append("..")
 
 import src
-import queue
 import argparse
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("port", help="Server public port", type=int)
+    parser.add_argument("--RTT", help="RTT", type=int)
+    parser.add_argument("--window", help="window", type=int)
     args = parser.parse_args()
 
-    RTT = 0.06
-    window = 100
+    if args.RTT:
+        RTT = args.RTT
+    else:
+        RTT = 0.06
+    if args.window:
+        WINDOW = args.window
+    else:
+        WINDOW = 100
 
-    if args.port:
-        ports_used = []
-        q_ports = queue.Queue()
-        ports = [args.port]
-        src.mainThread(args.port, q_ports, ports, RTT, window)
+    src.mainThread(args.port, RTT, WINDOW)
