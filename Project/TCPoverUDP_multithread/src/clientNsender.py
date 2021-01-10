@@ -2,7 +2,7 @@ import utils
 import os
 import time
 import socket
-from Test_performances import Test_performances
+# from Test_performances import Test_performances
 import queue
 import csv
 import pandas
@@ -49,11 +49,16 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
     # on envoie selon la congestion window
     tuples = []
     while True:
-        buf_window = buf[(sequence - 1):sequence + c_window]
+        # sequence = last_ack
+        if c_window >= 1000:
+            print("oops ca grandi trop")
+            c_window = 500
+        buf_window = buf[(sequence - 2):sequence + c_window]
         for data in buf_window:
-            sequence = buf.index(data) + 1
-            sequence = str(sequence).zfill(6).encode('utf-8')
-            sock.sendto(sequence + data, addr)
+            sequence_to_send = str(sequence).zfill(6).encode('utf-8')
+            if data:
+                sock.sendto(sequence_to_send + data, addr)
+                sequence += 1
 
         # on regarde les ack
         try:
@@ -62,22 +67,36 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
             if last_ack == length_buf:
                 print("Taille atteinte")
                 break
-            elif int(sequence) - last_ack > c_window:
-                print("Congestion detected, window size : " + str(c_window))
-                sequence = last_ack + 1
-                if c_window != 1:
-                    c_window = int(c_window / 2)
             else:
-                sequence = last_ack + 1
+                sequence = last_ack
                 c_window += 1
+                sequence_to_send = str(sequence).zfill(6).encode('utf-8')
+                to_send = buf[(sequence - 2):sequence + 10]
+                for data in to_send:
+                    sock.sendto(sequence_to_send + data, addr)
+                try:
+                    last_ack = q.get(block=True, timeout=RTT)
+                    # print(last_ack)
+                    if last_ack == length_buf:
+                        print("Taille atteinte")
+                        break
+                    else:
+                        sequence = last_ack
+                        c_window += 1
+                except Exception as e:
+                    raise e
             tuples.append((c_window, time.perf_counter()))
+            if sequence > 670000:
+                print(sequence, "/", length_buf)
 
         except Exception as e:
-            print("Congestion detected, window size : " + str(c_window))
+            print("rtt - Congestion detected, window size : " + str(c_window))
             tuples.append((c_window, time.perf_counter()))
-            sequence = last_ack + 1
+            sequence = last_ack
             if c_window != 1:
                 c_window = int(c_window / 2)
+        # print(last_ack,"/",sequence)
+        # print(c_window)
 
     time_end = time.perf_counter()
     print(" File sent with success ")
@@ -88,7 +107,7 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
     utils.sendToClient(sock, addr, utils.FIN)
     print("Debit : {:.4f} Mo/s".format(debit * 0.000001))
 
-    Test_performances(tuples)
+    # Test_performances(tuples)
 
     # Average window computing
     tuples = pandas.DataFrame(tuples)

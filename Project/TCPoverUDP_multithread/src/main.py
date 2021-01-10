@@ -59,7 +59,7 @@ if __name__ == '__main__':
     parser.add_argument("port", help="Server public port", type=int)
     args = parser.parse_args()
 
-    RTT = 0.06
+    RTT = 0.02
     window = 100
 
     if args.port:

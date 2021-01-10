@@ -9,4 +9,4 @@ def compare_files(file1, file2):
 
 
 if __name__ == '__main__':
-    compare_files("../../input/500mo.zip", "../../input/copy_500mo.zip")
+    compare_files("/tmp/PRS/input/1g.iso", "/tmp/PRS/clients/copy_1g.iso")

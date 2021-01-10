@@ -25,19 +25,19 @@ def clientN_ack(sock, q, done):
                 # print(f"Received ACK : {last_sequence_ack}")
         except socket.timeout:
             # envoyer au thread send la seq ack via une queue
-            if last_sequence_ack > value_in_queue:
+            if last_sequence_ack >= value_in_queue:
                 value_in_queue = last_sequence_ack
                 try:
                     q.get(block=False)
                 except queue.Empty:
                     pass
                 q.put(value_in_queue)
-            try:
-                # print("funish ?")
-                if done.get(block=False):
-                    break
-            except queue.Empty:
-                pass
+        try:
+            # print("funish ?")
+            if done.get(block=False):
+                break
+        except queue.Empty:
+            pass
 
     print("ACK finished")
     exit(0)
