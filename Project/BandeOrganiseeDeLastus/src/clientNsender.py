@@ -8,7 +8,7 @@ from .clientNack import clientN_ack
 
 
 def clientN_sender(sock, q, addr, default_RTT, win_size):
-    sock.settimeout(15)
+    sock.settimeout(5)
 
     try:
         rcv_filename, _ = utils.recvFromClient(sock)
@@ -42,23 +42,37 @@ def clientN_sender(sock, q, addr, default_RTT, win_size):
     while True:
         buf_window = buf[(sequence - 1):sequence + c_window]
         for data in buf_window:
-            sequence = buf.index(data) + 1
-            sequence = str(sequence).zfill(6).encode('utf-8')
-            sock.sendto(sequence + data, addr)
+            sequence_to_send = str(sequence).zfill(6).encode('utf-8')
+            if data:
+                sock.sendto(sequence_to_send + data, addr)
+                sequence += 1
 
         try:
             last_ack = q.get(block=True, timeout=RTT)
             if last_ack == length_buf:
                 #print("Taille atteinte")
                 break
-            elif int(sequence) - last_ack > c_window:
-                #print("Congestion detected, window size : " + str(c_window))
-                sequence = last_ack + 1
-                if c_window != 1:
-                    c_window = int(c_window / 2)
             else:
                 sequence = last_ack + 1
                 c_window += 1
+                to_send = buf[(sequence - 1):sequence + 10]
+                for data in to_send:
+                    sequence_to_send = str(sequence).zfill(6).encode('utf-8')
+                    if data:
+                        sock.sendto(sequence_to_send + data, addr)
+                        sequence += 1
+                try:
+                    last_ack = q.get(block=True, timeout=RTT)
+                    # print(last_ack)
+                    if last_ack == length_buf:
+                        print("Taille atteinte")
+                        break
+                    else:
+                        sequence = last_ack + 1
+                        c_window += 1
+                except Exception as e:
+                    raise e
+            tuples.append((c_window, time.perf_counter()))
 
         except Exception as e:
             #print("Congestion detected, window size : " + str(c_window))
